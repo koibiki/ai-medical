@@ -1,4 +1,5 @@
-from model_selection import LightGbmR, XgbR
+from model_selection.model.light_gbm import LightGbmR
+from model_selection.model.xgboost import XgbR
 
 
 class RegressorModelFactory(object):
