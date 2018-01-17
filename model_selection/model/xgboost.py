@@ -22,7 +22,8 @@ single_class_params = {
 
 multi_class_params = {
     'booster': 'gbtree',
-    'objective': 'binary:logistic',
+    'objective': 'multi:softmax',
+    'num_class': 3,
     'gamma': 0.1,  # 用于控制是否后剪枝的参数,越大越保守，一般0.1、0.2这样子。
     'max_depth': 12,  # 构建树的深度，越大越容易过拟合
     'lambda': 2,  # 控制模型复杂度的权重值的L2正则化项参数，参数越大，模型越不容易过拟合。
@@ -36,7 +37,7 @@ multi_class_params = {
     'eta': 0.007,  # 如同学习率
     'seed': 1000,
     'nthread': 7,  # cpu 线程数
-    'eval_metric': 'auc'
+    'eval_metric': 'merror'
 }
 
 regress_params = {
@@ -114,7 +115,6 @@ class XgbMultiC(PredictModel):
         watchlist = [(xgb_train, 'train'), (xgb_valid, 'val')]
         self.xgbc = xgb.train(multi_class_params, xgb_train, num_boost_round=5000, evals=watchlist,
                               early_stopping_rounds=100, verbose_eval=100)
-        pass
 
     def predict(self, X_test):
         xgb_test = xgb.DMatrix(X_test)

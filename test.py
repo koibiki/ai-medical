@@ -17,7 +17,7 @@ test = pd.read_csv('input/d_test_A_20180102.csv', encoding='gb2312')
 
 train_data = train.iloc[:, 1:-1]
 train_target = train.iloc[:, -1]
-train_target_class = train_target.apply()
+# train_target_class = train_target.apply()
 test_data = test.iloc[:, 1:]
 
 train_data['性别'] = train_data['性别'].map({'男': 1, '女': 0})
@@ -38,7 +38,7 @@ test_data.columns = str_columns
 # scale_train_data = train_data
 
 scale_train_data = create_scale_feature(train_data.iloc[:, 1:])
-scale_train_data['sex'] = train_data['sex']
+scale_train_data = pd.concat([train_data['sex'], scale_train_data], axis=1)
 
 scale_train_data, test_data = rank_feature(scale_train_data, test_data)
 # scale_train_data, test_data = rank_feature_count(scale_train_data, test_data)
