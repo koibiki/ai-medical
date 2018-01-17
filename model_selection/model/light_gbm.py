@@ -44,3 +44,15 @@ class LightGbmC(PredictModel):
     def predict(self, X_test):
         pass
 
+
+class LightGbmMultiC(PredictModel):
+
+    def create_predict_model(self):
+        pass
+
+    def fit(self, X_train, X_valid, y_train, y_valid):
+        pass
+
+    def predict(self, X_test):
+        pass
+
