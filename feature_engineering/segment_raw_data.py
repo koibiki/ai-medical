@@ -8,8 +8,8 @@ segment_types = {
 }
 
 segment_params = {
-    1: [12, 20, 45, 65],
-    2: 38,
+    1: [12, 25, 40, 65],
+    2: 70,
     3: 55,
 }
 
@@ -44,7 +44,9 @@ def segment_raw_data(data, index):
         return pd.get_dummies(data['segment_' + str(index)])
     elif segment_type == 2:
         data['segment_' + str(index)] = data.apply(lambda x: 1 if x >= segment_param else 0)
-        return data['segment_' + str(index)]
+        new_pd = pd.DataFrame(data['segment_' + str(index)].values, columns=[('segment_' + str(index))])
+        print(new_pd)
+        return new_pd
     elif segment_type == 3:
         data['segment_' + str(index)] = data.apply(lambda x: segment_3(x, segment_param, 'segment_' + str(index)))
         return pd.get_dummies(data['segment_' + str(index)])
