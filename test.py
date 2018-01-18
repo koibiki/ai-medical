@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from feature_engineering.segment_raw_data import segment_raw_data
 from feature_engineering.rank_feature import rank_feature, rank_feature_by_max, rank_feature_count
 from model_selection.classifier_model_factory import ClassifierModelFactory
 from model_selection.regressor_model_factory import RegressorModelFactory
@@ -35,15 +36,17 @@ str_columns = ['sex', 'age'] + ['f' + str(p) for p in range(len(columns)-2)]
 train_data.columns = str_columns
 test_data.columns = str_columns
 
-# scale_train_data = train_data
+scale_train_data = train_data
 
-scale_train_data = create_scale_feature(train_data.iloc[:, 1:])
-scale_train_data = pd.concat([train_data['sex'], scale_train_data], axis=1)
+# scale_train_data = create_scale_feature(train_data.iloc[:, 1:])
+# scale_train_data = pd.concat([train_data['sex'], scale_train_data], axis=1)
 
-scale_train_data, test_data = rank_feature(scale_train_data, test_data)
-# scale_train_data, test_data = rank_feature_count(scale_train_data, test_data)
+# new_feature = segment_raw_data(scale_train_data['age'], 1)
+# scale_train_data = pd.concat([new_feature, train_data], axis=1)
 
-cmf = ClassifierModelFactory()
+print(scale_train_data.shape)
+print(scale_train_data.columns)
+# cmf = ClassifierModelFactory()
 rmf = RegressorModelFactory()
 
 X_train, X_valid, y_train, y_valid = train_test_split(scale_train_data, train_target, test_size=0.1, random_state=33)
@@ -56,15 +59,15 @@ lgb_y_valid, kf_lgb_mse = k_fold_regressor(X_train, y_train, X_valid, RegressorM
 # model.fit(X_train, X_valid, y_train, y_valid)
 # predict = model.predict(X_valid)
 # print(predict)
-y_pred = (lgb_y_valid )
-
-print('kf mse:', (kf_lgb_mse )/2)
-print('mse : ', mean_squared_error(y_valid, y_pred)/2)
+# y_pred = (lgb_y_valid )
+#
+# print('kf mse:', (kf_lgb_mse )/2)
+# print('mse : ', mean_squared_error(y_valid, y_pred)/2)
 
 # pd_pred = pd.DataFrame(y_pred, columns=['血糖'])
 # pd_pred.to_csv('output/prediction.csv', index=None, header=None)
-x = range(len(y_pred))
-plt.plot(x, y_pred, 'r-*', label='y_pred')
-plt.plot(x, y_valid, 'b-o', label='y_valid')
-plt.legend()
-plt.show()
+# x = range(len(y_pred))
+# plt.plot(x, y_pred, 'r-*', label='y_pred')
+# plt.plot(x, y_valid, 'b-o', label='y_valid')
+# plt.legend()
+# plt.show()
