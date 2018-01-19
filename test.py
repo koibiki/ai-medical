@@ -9,11 +9,13 @@ from model_selection.regressor_model_factory import RegressorModelFactory
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import mean_squared_error
-from model_selection.cv import k_fold_regressor, balance_k_fold_regressor, balance_k_fold_regressor2
+from model_selection.cv import k_fold_regressor, balance_k_fold_regressor
 from utils import create_scale_feature
 
-# 求每个feature 与其中位值的差值
+# 分别求出高血糖 中血糖 正常血糖每个feature 与其中位值的差值
 # 将 血糖大于7的部分与 其他进行平衡抽样训练
+
+
 
 train = pd.read_csv('input/d_train_20180102.csv', encoding='gb2312')
 test = pd.read_csv('input/d_test_A_20180102.csv', encoding='gb2312')
@@ -42,6 +44,9 @@ train_target.name = 'Y'
 
 scale_train_data = train_data
 
+describe = scale_train_data.describe()
+describe.median()
+
 # scale_train_data = create_scale_feature(train_data.iloc[:, 1:])
 # scale_train_data = pd.concat([train_data['sex'], scale_train_data], axis=1)
 
@@ -53,18 +58,13 @@ print(scale_train_data.head())
 # cmf = ClassifierModelFactory()
 scale_train_target = pd.concat([scale_train_data, train_target], axis=1)
 
-high_train_target = scale_train_target[scale_train_target['Y'] >= 7]
-median_train_target = scale_train_target[(scale_train_target['Y'] >= 6.1).values & (scale_train_target['Y'] < 7).values]
-normal_train_target = scale_train_target[scale_train_target['Y'] < 6.1]
-
-
-
 
 rmf = RegressorModelFactory()
 
 X_train, X_valid, y_train, y_valid = train_test_split(scale_train_data, train_target, test_size=0.1, random_state=33)
 
-lgb_y_valid, kf_lgb_mse = balance_k_fold_regressor2(X_train, y_train, X_valid, RegressorModelFactory.MODEL_LIGHET_GBM, cv=5)
+lgb_y_valid, kf_lgb_mse, high_train_index, median_train_index, normal_train_index = \
+    balance_k_fold_regressor(X_train, y_train, X_valid, RegressorModelFactory.MODEL_LIGHET_GBM, cv=5)
 # xgb_y_valid, kf_xgb_mse = k_fold_regressor(X_train, y_train, X_valid, RegressorModelFactory.MODEL_XGBOOST, cv=5)
 
 # model = rmf.create_model(RegressorModelFactory.MODEL_XGBOOST)
@@ -73,10 +73,10 @@ lgb_y_valid, kf_lgb_mse = balance_k_fold_regressor2(X_train, y_train, X_valid, R
 # predict = model.predict(X_valid)
 # print(predict)
 y_pred = (lgb_y_valid )
+
 #
 print('kf mse:', (kf_lgb_mse )/2)
 print('mse : ', mean_squared_error(y_valid, y_pred)/2)
-print(y_pred)
 
 # pd_pred = pd.DataFrame(y_pred, columns=['血糖'])
 # pd_pred.to_csv('output/prediction.csv', index=None, header=None)
