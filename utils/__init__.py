@@ -1,5 +1,7 @@
 import random
 import pandas as pd
+import numpy as np
+import math
 
 
 def create_sample(data):
@@ -60,3 +62,24 @@ def normalize_feature(data, f_min=0, f_max=100):
     factor = (f_max - f_min)/(d_max - d_min)
     normalized = f_min + (data - d_min) * factor
     return normalized, factor
+
+
+def normalize_data_frame(df, start_index):
+    factors = {}
+    for index in range(start_index, df.shape[1]):
+        df.iloc[:, index], factor = normalize_feature(data=df.iloc[:, index])
+        factors[index] = factor
+    return df, factors
+
+
+def get_euclidean_metric(vec1, vec2):
+    return np.sqrt(np.sum(np.square(vec1 - vec2)))
+
+
+def get_cosine(vec1, vec2):
+    np_vec1, np_vec2 = np.array(vec1), np.array(vec2)
+    return np_vec1.dot(np_vec2)/(math.sqrt((np_vec1 ** 2).sum()) * math.sqrt((np_vec2 ** 2).sum()))
+
+
+def get_cosine_angle(vec1, vec2):
+    return math.acos(get_cosine(vec1, vec2)) / math.pi * 180

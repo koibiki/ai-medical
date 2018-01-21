@@ -12,7 +12,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import mean_squared_error
 from model_selection.cv import k_fold_regressor, balance_k_fold_regressor
-from utils import create_scale_feature
+from utils import create_scale_feature, normalize_data_frame
 
 # 分别求出高血糖 中血糖 正常血糖每个feature 与其中位值的差值
 # 将 血糖大于7的部分与 其他进行平衡抽样训练
@@ -56,12 +56,6 @@ test_data['性别'] = test_data['性别'].map({'男': 1, '女': 0})
 train_data = train_data.drop(['体检日期'], axis=1)
 test_data = test_data.drop(['体检日期'], axis=1)
 
-train_data.fillna(train_data.median(axis=0), inplace=True)
-test_data.fillna(test_data.median(axis=0), inplace=True)
-# train_data = train_data.drop(['乙肝表面抗原', '乙肝表面抗体', '乙肝e抗原', '乙肝e抗体', '乙肝核心抗体'], axis=1)
-# test_data = test_data.drop(['乙肝表面抗原', '乙肝表面抗体', '乙肝e抗原', '乙肝e抗体', '乙肝核心抗体'], axis=1)
-
-
 columns = train_data.columns
 print(columns)
 str_columns = ['sex', 'age'] + ['f' + str(p) for p in range(len(columns)-2)]
@@ -74,6 +68,9 @@ scale_train_data = train_data
 
 describe = scale_train_data.describe()
 describe.median()
+
+train_data, factors = normalize_data_frame(train_data, start_index=2)
+train_data.fillna(-99, inplace=True)
 
 scale_train_data = train_data
 # scale_train_data = create_scale_feature(train_data.iloc[:, 1:])
