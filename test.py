@@ -27,6 +27,7 @@ train_data = train.iloc[:, 1:-1]
 train_target = train.iloc[:, -1]
 # train_target_class = train_target.apply()
 test_data = test.iloc[:, 1:]
+print(test_data.shape)
 
 train_data['性别'] = train_data['性别'].map({'男': 1, '女': 0})
 test_data['性别'] = test_data['性别'].map({'男': 1, '女': 0})
@@ -47,11 +48,16 @@ train_data_target = pd.concat([train_data, train_target], axis=1)
 
 train_data_target = delete_error_data(train_data_target)
 train_data_target = filtration(train_data_target)
+test_data = filtration(test_data)
 
 train_data = train_data_target.iloc[:, 1:-1]
 train_target = train_data_target.iloc[:, -1]
-train_data, factors = normalize_data_frame(train_data, start_index=2)
+train_test = pd.concat([train_data, test_data], axis=0)
+train_test, factors = normalize_data_frame(train_test, start_index=2)
+train_data = train_test.iloc[:train_data.shape[0]]
+test_data = train_test.iloc[train_data.shape[0]:]
 train_data.fillna(-99, inplace=True)
+test_data.fillna(-99, inplace=True)
 
 scale_train_data = train_data
 # scale_train_data = create_scale_feature(train_data.iloc[:, 1:])
@@ -67,12 +73,12 @@ scale_train_data = train_data
 rmf = RegressorModelFactory()
 
 X_train, X_valid, y_train, y_valid = \
-    train_test_split(train_data, train_target, test_size=0.1, random_state=33)
+    train_test_split(train_data, train_target, test_size=0.01, random_state=33)
 
 lgb_y_valid, kf_lgb_mse, cv_lgm_indexs = \
-    k_fold_regressor(X_train, y_train, X_valid, RegressorModelFactory.MODEL_LIGHET_GBM, cv=5)
+    k_fold_regressor(X_train, y_train, test_data, RegressorModelFactory.MODEL_LIGHET_GBM, cv=5)
 xgb_y_valid, kf_xgb_mse, cv_xgb_indexs = \
-    k_fold_regressor(X_train, y_train, X_valid, RegressorModelFactory.MODEL_XGBOOST, cv=5)
+    k_fold_regressor(X_train, y_train, test_data, RegressorModelFactory.MODEL_XGBOOST, cv=5)
 
 # model = rmf.create_model(RegressorModelFactory.MODEL_XGBOOST)
 # model = cmf.create_model(ClassifierModelFactory.MODEL_XGBOOST)
@@ -83,10 +89,11 @@ y_pred = (lgb_y_valid + xgb_y_valid)/2
 
 #
 print('kf mse:', (kf_lgb_mse + kf_xgb_mse)/4)
-print('mse : ', mean_squared_error(y_valid, y_pred)/2)
+# print('mse : ', mean_squared_error(y_valid, y_pred)/2)
 
-# pd_pred = pd.DataFrame(y_pred, columns=['血糖'])
-# pd_pred.to_csv('output/prediction.csv', index=None, header=None)
+pd_pred = pd.DataFrame(y_pred, columns=['血糖'])
+pd_pred.to_csv('output/prediction.csv', index=None, header=None)
+print(len(y_pred))
 # x = range(len(y_pred))
 # plt.plot(x, y_pred, 'r-*', label='y_pred')
 # plt.plot(x, y_valid, 'b-o', label='y_valid')
