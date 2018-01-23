@@ -19,6 +19,31 @@ def balance_sample(data):
     return X_train, X_valid, y_train, y_valid
 
 
+# 需要在修改时间格式后运行
+def sample_by_test_scale(train, test):
+    train_date = train['date'].unique()
+    test_date = test['date'].unique()
+    valid_set = []
+    train_set = []
+    for date in test_date:
+        test_date_item = test[test['date'] == date]
+        train_date_item = train[train['date'] == date]
+        scale = test_date_item.shape[0]/train_date_item.shape[0]
+        print('date:' + str(date) + '  scale:' + str(scale))
+        X_train, X_valid, y_train, y_valid = \
+            train_test_split(train_date_item.iloc[:, :-1], train_date_item.iloc[:, -1], test_size=scale, random_state=33)
+        valid_item = pd.concat([X_valid, y_valid], axis=1)
+        train_item = pd.concat([X_train, y_train], axis=1)
+        valid_set.append(valid_item)
+        train_set.append(train_item)
+    train_dates = [date for date in train_date if date not in test_date]
+    for date in train_dates:
+        train_set.append(train[train['date'] == date])
+    train_all = pd.concat(train_set, axis=0)
+    valid_all = pd.concat(valid_set, axis=0)
+    return train_all, valid_all
+
+
 def separate_high_median_normal(data):
     high = data[data['Y'] >= 7]
     median = data[(data['Y'] >= 6.1).values & (data['Y'] < 7).values]

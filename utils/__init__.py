@@ -4,13 +4,23 @@ import numpy as np
 import math
 
 
+def sample_rule(x):
+    if np.isnan(x):
+        return x
+    else:
+        return x * (0.97 + 0.06 * random.random())
+
+
 def create_sample(data):
     randoms = []
-    for index in range(len(data)):
-        random_value = [item * (0.97 + 0.06 * random.random()) for item in data.iloc[index].values]
-        random_series = pd.Series(random_value, index=data.columns)
+    data_sex_age_date = data.iloc[:, :3].reset_index(drop=True)
+    data_other = data.iloc[:, 3:].reset_index(drop=True)
+    for index in range(len(data_other)):
+        random_value = [sample_rule(item) for item in data.iloc[index].values]
+        random_series = pd.Series(random_value, index=data_other.columns)
         randoms.append(random_series)
-    return pd.DataFrame(randoms).reset_index()
+    random_data = pd.DataFrame(randoms).reset_index(drop=True)
+    return pd.concat([data_sex_age_date, random_data], axis=1)
 
 
 def create_scale_feature(data):
@@ -124,7 +134,7 @@ def delete_error_data(df):
     print(df.shape)
     # 删除 f19 kf mse 0.97995  predict mse 0.7308
     # 不删除   kf mse 0.95059  predict mse 1.0235
-    # df = df[(df['f19'] < 12.5).values | np.isnan(df['f19'])]
+    df = df[(df['f19'] < 12.5).values | np.isnan(df['f19'])]
     print(df.shape)
     df = df[(df['f20'] < 16).values | np.isnan(df['f20'])]
     print(df.shape)
@@ -169,7 +179,7 @@ def filtration(df):
 
     df['f17'] = df['f17'].apply(lambda x: x if (x < 2.5) | np.isnan(x) else 2.5)
 
-    # df['f19'] = df['f19'].apply(lambda x: x if (x < 12.5) | np.isnan(x) else 12.5)
+    df['f19'] = df['f19'].apply(lambda x: x if (x < 12.5) | np.isnan(x) else 12.5)
 
     df['f20'] = df['f20'].apply(lambda x: x if (x < 16) | np.isnan(x) else 16)
 

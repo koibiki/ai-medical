@@ -116,7 +116,7 @@ def k_fold_regressor(train_x, train_y, test_x, model_num, cv=5):
         test_y_pred = model.predict(test_x)
         test_y_preds.append(test_y_pred)
         cv_indexs[i] = [train_index, test_index]
-    print(cmf.get_model_name(model_num) + ' k fold validation:', sum(mses) * 0.5 / len(mses))
+    print(rmf.get_model_name(model_num) + ' k fold validation:', sum(mses) * 0.5 / len(mses))
     predict = calculate_mean(test_y_preds)
     save_prediction(predict, model_num)
     return predict, sum(mses)/len(mses), cv_indexs
