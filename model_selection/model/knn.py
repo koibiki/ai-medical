@@ -8,7 +8,7 @@ class KnnR(PredictModel):
     knr = None
 
     def create_predict_model(self):
-        self.knr = KNeighborsRegressor(weights='distance')
+        self.knr = KNeighborsRegressor(n_neighbors=30, weights='distance')
 
     def fit(self, X_train, X_valid, y_train, y_valid):
         self.create_predict_model()

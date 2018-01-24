@@ -17,20 +17,20 @@ from model_selection.model.xgboost import XgbR
 
 class RegressorModelFactory(object):
 
-    MODEL_LIGHET_GBM = 0
-    MODEL_XGBOOST = 1
-    MODEL_CAT_BOOST = 2
-    MODEL_RANDOM_FOREST = 3
-    MODEL_GBR = 4
-    MODEL_TENSOR_DNN = 5
-    MODEL_TENSOR_LR = 6
-    MODEL_KNR = 7
-    MODEL_EXTRA_TREE = 8
-    MODEL_SGD = 9
-    MODEL_LINEAR = 10
-    MODEL_SVM_LR = 11
-    MODEL_SVM_POLY = 12
-    MODEL_SVM_RBF = 13
+    MODEL_LIGHET_GBM = 0     # 0.98163  0.93700
+    MODEL_XGBOOST = 1        # 0.99017  0.94834
+    MODEL_CAT_BOOST = 2      # 0.99843  0.96134
+    MODEL_RANDOM_FOREST = 3  # 1.14114  1.01971
+    MODEL_GBR = 4            # 1.02462  1.00810
+    MODEL_TENSOR_DNN = 5     # 1.00135  0.93757
+    MODEL_TENSOR_LR = 6      # 1.02412  0.98366
+    MODEL_KNR = 7            # 1.08847  1.08014
+    MODEL_EXTRA_TREE = 8     # 1.14695  1.05303
+    MODEL_SGD = 9            # 1.05830  1.01295
+    MODEL_LINEAR = 10        # 1.02395  0.98774
+    MODEL_SVM_LR = 11        # 1.10623  1.05592
+    MODEL_SVM_POLY = 12      # 1.17332  1.12241
+    MODEL_SVM_RBF = 13       # 1.12694  1.07303
     MODEL_DECISION_TREE = 14
 
     model_name = {MODEL_LIGHET_GBM: 'light_gbm_r_',

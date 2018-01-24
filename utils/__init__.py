@@ -29,8 +29,8 @@ def create_sample(data):
 def create_scale_feature(data):
     new_data = data
     columns = data.columns
-    for index in range(len(columns)):
-        if index == 0:
+    for index in range(3, len(columns)-3):
+        if index == 3:
             continue
         for j in range(index + 1, len(columns)):
             new_data.insert(new_data.shape[1], columns[j] + '_' + columns[index], data.iloc[:, j] / data.iloc[:, index])
