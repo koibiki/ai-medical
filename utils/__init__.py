@@ -8,19 +8,22 @@ def sample_rule(x):
     if np.isnan(x):
         return x
     else:
+        random.seed(4)
+
         return x * (0.97 + 0.06 * random.random())
 
 
 def create_sample(data):
     randoms = []
     data_sex_age_date = data.iloc[:, :3].reset_index(drop=True)
-    data_other = data.iloc[:, 3:].reset_index(drop=True)
+    data_target = data.iloc[:, -1].reset_index(drop=True)
+    data_other = data.iloc[:, 3:-1].reset_index(drop=True)
     for index in range(len(data_other)):
-        random_value = [sample_rule(item) for item in data.iloc[index].values]
+        random_value = [sample_rule(item) for item in data_other.iloc[index].values]
         random_series = pd.Series(random_value, index=data_other.columns)
         randoms.append(random_series)
     random_data = pd.DataFrame(randoms).reset_index(drop=True)
-    return pd.concat([data_sex_age_date, random_data], axis=1)
+    return pd.concat([data_sex_age_date, random_data, data_target], axis=1)
 
 
 def create_scale_feature(data):
@@ -191,3 +194,67 @@ def filtration(df):
 
     df['f33'] = df['f33'].apply(lambda x: x if (x < 60) | np.isnan(x) else 60)
     return df
+
+
+def search_min_level_all(data, start_column_index):
+    columns = data.columns
+    min_level_dict = {}
+    for index in range(start_column_index, len(columns)):
+        column_data = data.iloc[:, index]
+        min_level = search_min_level(column_data)
+        min_level_dict[column_data.name] = min_level
+    return min_level_dict
+
+
+def search_max_level_all(data, start_column_index):
+    columns = data.columns
+    max_level_dict = {}
+    for index in range(start_column_index, len(columns)):
+        column_data = data.iloc[:, index]
+        max_level = search_max_level(column_data)
+        max_level_dict[column_data.name] = max_level
+    return max_level_dict
+
+
+def search_min_level(data):
+    data_non_nan = data[np.isnan(data) == False]
+    min_value = data_non_nan.min()
+    mean_value = data_non_nan.mean()
+    step = (mean_value - min_value)/100
+    min_scale = 1
+    min_level = min_value
+    while True:
+        min_level_data = data_non_nan[data_non_nan >= min_level]
+        if min_scale - len(min_level_data)/len(data_non_nan) > 0.03:
+            step = step/2
+            min_level = min_level - step
+        elif len(min_level_data)/len(data_non_nan) < 0.96 or step < 0.001:
+            break
+        else:
+            min_level = min_level + step
+    if min_value/min_level >= 0.9:
+        min_level = min_value
+    print(data_non_nan.name + '  min_level:' + str(min_level) + '  scale:' + str(len(min_level_data)/len(data_non_nan)))
+    return min_level
+
+
+def search_max_level(data):
+    data_non_nan = data[np.isnan(data) == False]
+    max_value = data_non_nan.max()
+    mean_value = data_non_nan.mean()
+    step = (max_value - mean_value)/100
+    max_scale = 1
+    max_level = max_value
+    while True:
+        max_level_data = data_non_nan[data_non_nan <= max_level]
+        if max_scale - len(max_level_data)/len(data_non_nan) > 0.03:
+            step = step/2
+            max_level = max_level + step
+        elif len(max_level_data)/len(data_non_nan) < 0.96 or step < 0.00001:
+            break
+        else:
+            max_level = max_level - step
+    if max_level/max_value >= 0.9:
+        max_level = max_value
+    print(data_non_nan.name + '  max_level:' + str(max_level) + '  scale:' + str(len(max_level_data)/len(data_non_nan)))
+    return max_level

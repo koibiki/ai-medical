@@ -26,7 +26,7 @@ class LightGbmR(PredictModel):
     def fit(self, X_train, X_valid, y_train, y_valid):
         lgb_train = lgb.Dataset(X_train, y_train)
         lgb_valid = lgb.Dataset(X_valid, y_valid)
-        self.gbm = lgb.train(class_params, lgb_train, num_boost_round=5000, valid_sets=lgb_valid, verbose_eval=100,
+        self.gbm = lgb.train(class_params, lgb_train, num_boost_round=20000, valid_sets=lgb_valid, verbose_eval=100,
                              early_stopping_rounds=100)
 
     def predict(self, X_test):

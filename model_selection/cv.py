@@ -8,6 +8,7 @@ from sklearn.model_selection import KFold
 
 from model_selection.classifier_model_factory import ClassifierModelFactory
 from model_selection.regressor_model_factory import RegressorModelFactory
+from utils import create_sample
 
 cmf = ClassifierModelFactory()
 rmf = RegressorModelFactory()
@@ -95,6 +96,46 @@ def balance_k_fold_regressor(train_x, train_y, test_x, model_num, cv=5):
     predict = calculate_mean(test_y_preds)
     save_prediction(predict, model_num)
     return predict, sum(mses)/len(mses), high_train_index, median_train_index, normal_train_index
+
+
+def create_sample_k_fold_regressor(train_x, train_y, test_x, model_num, cv=5):
+    print('开始CV 5折训练...')
+
+    train_x_y = pd.concat([train_x, train_y], axis=1)
+    high, median, normal = separate_high_median_normal(train_x_y)
+    random_highs = [high]
+    for index in range(9):
+        random_high = create_sample(high)
+        random_highs.append(random_high)
+
+    new_train_x_y = pd.concat((random_highs + [normal]), axis=0)
+    train_x = new_train_x_y.iloc[:, :-1]
+    train_y = new_train_x_y.iloc[:, -1]
+
+    print('train_x:' + str(train_x.shape))
+    print('train_y:' + str(train_y.shape))
+
+    kf = KFold(n_splits=cv, shuffle=True, random_state=33)
+    mses = []
+    test_y_preds = []
+    cv_indexs ={}
+    for i, (train_index, test_index) in enumerate(kf.split(train_x)):
+        print('第{}次训练...'.format(i))
+        model = rmf.create_model(model_num)
+        kf_X_train = train_x.iloc[train_index]
+        kf_y_train = train_y.iloc[train_index]
+        kf_X_valid = train_x.iloc[test_index]
+        kf_y_valid = train_y.iloc[test_index]
+        model.fit(kf_X_train, kf_X_valid, kf_y_train, kf_y_valid)
+        kf_y_pred = model.predict(kf_X_valid)
+        mses.append(mean_squared_error(kf_y_pred, kf_y_valid))
+        test_y_pred = model.predict(test_x)
+        test_y_preds.append(test_y_pred)
+        cv_indexs[i] = [train_index, test_index]
+    print(rmf.get_model_name(model_num) + ' k fold validation:', sum(mses) * 0.5 / len(mses))
+    predict = calculate_mean(test_y_preds)
+    save_prediction(predict, model_num)
+    return predict, sum(mses)/len(mses), cv_indexs
 
 
 def k_fold_regressor(train_x, train_y, test_x, model_num, cv=5):
