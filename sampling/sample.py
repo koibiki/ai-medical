@@ -49,3 +49,7 @@ def separate_high_median_normal(data):
     median = data[(data['Y'] >= 6.1).values & (data['Y'] < 7).values]
     normal = data[data['Y'] < 6.1]
     return high, median, normal
+
+
+def separate_high_normal(data):
+    return data[data.iloc[:, -1] == 1], data[data.iloc[:, -1] == 0]

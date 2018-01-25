@@ -16,14 +16,13 @@ def sample_rule(x):
 def create_sample(data):
     randoms = []
     data_sex_age_date = data.iloc[:, :3].reset_index(drop=True)
-    data_target = data.iloc[:, -1].reset_index(drop=True)
-    data_other = data.iloc[:, 3:-1].reset_index(drop=True)
+    data_other = data.iloc[:, 3:].reset_index(drop=True)
     for index in range(len(data_other)):
         random_value = [sample_rule(item) for item in data_other.iloc[index].values]
         random_series = pd.Series(random_value, index=data_other.columns)
         randoms.append(random_series)
     random_data = pd.DataFrame(randoms).reset_index(drop=True)
-    return pd.concat([data_sex_age_date, random_data, data_target], axis=1)
+    return pd.concat([data_sex_age_date, random_data], axis=1)
 
 
 def create_scale_feature(data):
@@ -258,3 +257,15 @@ def search_max_level(data):
         max_level = max_value
     print(data_non_nan.name + '  max_level:' + str(max_level) + '  scale:' + str(len(max_level_data)/len(data_non_nan)))
     return max_level
+
+
+def logloss_to_class(data, class_level=0.5):
+    return [np.math.ceil(x - class_level) for x in data]
+
+
+def softmax_to_class(data):
+    classes = []
+    for index in range(len(data)):
+        class_type = np.where(data[index] == np.max(data[index]))
+        classes.append(class_type)
+    return classes
