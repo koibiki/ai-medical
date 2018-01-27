@@ -259,13 +259,22 @@ def search_max_level(data):
     return max_level
 
 
+def value_to_multi_class(x):
+    if x < 6.1:
+        return 0
+    elif x >= 6.1 & x <7:
+        return 1
+    else:
+        return 2
+
+
 def logloss_to_class(data, class_level=0.5):
     return [np.math.ceil(x - class_level) for x in data]
 
 
-def softmax_to_class(data):
+def softmax_to_class(data, level=0.5):
     classes = []
     for index in range(len(data)):
-        class_type = np.where(data[index] == np.max(data[index]))
+        class_type = 0 if np.max(data[index]) < level else np.where(data[index] == np.max(data[index]))[0][0]
         classes.append(class_type)
     return classes

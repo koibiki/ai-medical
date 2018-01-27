@@ -5,6 +5,7 @@ from sampling.sample import separate_high_median_normal
 
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import classification_report
 from sklearn.model_selection import KFold
 
 from model_selection.multi_classifier_model_factory import MultiClassifierModelFactory
@@ -17,8 +18,33 @@ cmf = ClassifierModelFactory()
 rmf = RegressorModelFactory()
 
 
+def k_fold_multi_classifier(train_x, train_y, test_x, model_num, cv=5):
+    print('开始CV{}折训练...'.format(cv))
+    kf = KFold(n_splits=cv, shuffle=True, random_state=20)
+
+    test_y_preds = []
+    cv_indexs = {}
+    for i, (train_index, test_index) in enumerate(kf.split(train_x)):
+        print('第{}次训练...'.format(i))
+        model = mcmf.create_model(model_num)
+        kf_X_train = train_x.iloc[train_index]
+        kf_y_train = train_y.iloc[train_index]
+        kf_X_valid = train_x.iloc[test_index]
+        kf_y_valid = train_y.iloc[test_index]
+        model.fit(kf_X_train, kf_X_valid, kf_y_train, kf_y_valid)
+        kf_y_pred = model.predict(kf_X_valid)
+        print(kf_y_pred)
+        print(softmax_to_class(kf_y_pred))
+        print(classification_report(kf_y_valid, softmax_to_class(kf_y_pred)))
+        test_y_pred = model.predict(test_x)
+        test_y_preds.append(test_y_pred)
+        cv_indexs[i] = [train_index, test_index]
+    predict = calculate_multi_mean(test_y_preds)
+    return predict
+
+
 def k_fold_classifier(train_x, train_y, test_x, model_num, cv=5):
-    print('开始CV 5折训练...')
+    print('开始CV{}折训练...'.format(cv))
     kf = KFold(n_splits=cv, shuffle=True, random_state=33)
     ass = []
     test_y_preds = []
@@ -42,7 +68,7 @@ def k_fold_classifier(train_x, train_y, test_x, model_num, cv=5):
 
 
 def balance_k_fold_regressor(train_x, train_y, test_x, model_num, cv=5):
-    print('开始balance2 CV 5折训练...')
+    print('开始CV{}折训练...'.format(cv))
 
     train_x_y = pd.concat([train_x, train_y], axis=1)
     high, median, normal = separate_high_median_normal(train_x_y)
@@ -100,8 +126,7 @@ def balance_k_fold_regressor(train_x, train_y, test_x, model_num, cv=5):
 
 
 def create_sample_k_fold_regressor(train_x, train_y, test_x, model_num, cv=5):
-    print('开始CV 5折训练...')
-
+    print('开始CV{}折训练...'.format(cv))
     train_x_y = pd.concat([train_x, train_y], axis=1)
     high, median, normal = separate_high_median_normal(train_x_y)
     random_highs = [high]
@@ -139,7 +164,7 @@ def create_sample_k_fold_regressor(train_x, train_y, test_x, model_num, cv=5):
 
 
 def k_fold_regressor(train_x, train_y, test_x, model_num, cv=5):
-    print('开始CV 5折训练...')
+    print('开始CV{}折训练...'.format(cv))
     kf = KFold(n_splits=cv, shuffle=True, random_state=33)
     mses = []
     test_y_preds = []
@@ -167,3 +192,13 @@ def calculate_mean(preds):
     for item in preds:
         sum_pred += np.array(item)
     return sum_pred/len(preds)
+
+
+def calculate_multi_mean(preds):
+    new_preds = []
+    for index in range(len(preds[0])):
+        sum_pred = np.zeros(len(preds[0][0]))
+        for i in range(len(preds)):
+            sum_pred += np.array(preds[i][index])
+        new_preds.append(sum_pred/len(preds))
+    return new_preds
