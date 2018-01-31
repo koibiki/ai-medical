@@ -25,17 +25,6 @@ def create_sample(data):
     return pd.concat([data_sex_age_date, random_data], axis=1)
 
 
-def create_scale_feature(data):
-    new_data = data
-    columns = data.columns
-    for index in range(3, len(columns)-3):
-        if index == 3:
-            continue
-        for j in range(index + 1, len(columns)):
-            new_data.insert(new_data.shape[1], columns[j] + '_' + columns[index], data.iloc[:, j] / data.iloc[:, index])
-    return new_data
-
-
 def fix_min(data):
     for index in range(len(data)):
         column_values = data.iloc[:, index]
@@ -76,7 +65,7 @@ def normalize_feature(data, f_min=0, f_max=100):
     return normalized, factor
 
 
-def normalize_data_frame(df, start_index):
+def normalize_data_frame(df, start_index=0):
     factors = {}
     for index in range(start_index, df.shape[1]):
         df.iloc[:, index], factor = normalize_feature(data=df.iloc[:, index])
