@@ -1,0 +1,2 @@
+x_svm构建参见https://github.com/scikit-learn-contrib/imbalanced-learn/blob/master/examples/over-sampling/plot_smote.py
+训练代码自行修改makefeat函数即可，训练结果10以上血糖值6个，对标准测试集中对应预测值进行替换

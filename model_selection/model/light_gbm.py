@@ -1,4 +1,6 @@
 import lightgbm as lgb
+from sklearn.metrics import mean_squared_error
+
 from model_selection.predict_model import PredictModel
 
 regress_params = {
@@ -45,7 +47,14 @@ multi_class_params = {
     'verbose': -1,
 }
 
+
 class LightGbmR(PredictModel):
+
+    @staticmethod
+    def evaluator(pred, df):
+        label = df.get_label().values.copy()
+        score = mean_squared_error(label, pred) * 0.5
+        return '0.5mse', score, False
 
     gbm = None
 
@@ -56,7 +65,7 @@ class LightGbmR(PredictModel):
         lgb_train = lgb.Dataset(X_train, y_train)
         lgb_valid = lgb.Dataset(X_valid, y_valid)
         self.gbm = lgb.train(regress_params, lgb_train, num_boost_round=50000, valid_sets=lgb_valid, verbose_eval=300,
-                             early_stopping_rounds=300)
+                             feval=self.evaluator, early_stopping_rounds=300)
 
     def predict(self, X_test):
         return self.gbm.predict(X_test)

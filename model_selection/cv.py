@@ -165,8 +165,8 @@ def create_sample_k_fold_regressor(train_x, train_y, test_x, model_num, cv=5):
 
 def k_fold_regressor(train_x, train_y, test_x, model_num, cv=5):
     print('开始CV{}折训练...'.format(cv))
-    kf = KFold(n_splits=cv, shuffle=True, random_state=33)
-    mses = []
+    kf = KFold(n_splits=cv, shuffle=True, random_state=520)
+    y_pred = np.zeros(train_x.shape[0])
     test_y_preds = []
     cv_indexs ={}
     for i, (train_index, test_index) in enumerate(kf.split(train_x)):
@@ -177,14 +177,13 @@ def k_fold_regressor(train_x, train_y, test_x, model_num, cv=5):
         kf_X_valid = train_x.iloc[test_index]
         kf_y_valid = train_y.iloc[test_index]
         model.fit(kf_X_train, kf_X_valid, kf_y_train, kf_y_valid)
-        kf_y_pred = model.predict(kf_X_valid)
-        mses.append(mean_squared_error(kf_y_pred, kf_y_valid))
+        y_pred[test_index] += model.predict(kf_X_valid)
         test_y_pred = model.predict(test_x)
         test_y_preds.append(test_y_pred)
         cv_indexs[i] = [train_index, test_index]
-    print(rmf.get_model_name(model_num) + ' k fold validation:', sum(mses) * 0.5 / len(mses))
+    print(rmf.get_model_name(model_num) + ' k fold validation:', mean_squared_error(train_y, y_pred)/2)
     predict = calculate_mean(test_y_preds)
-    return predict, sum(mses)/len(mses), cv_indexs
+    return predict, cv_indexs
 
 
 def calculate_mean(preds):
