@@ -58,21 +58,6 @@ def fix_min_all(data):
     return data
 
 
-def normalize_feature(data, f_min=0, f_max=100):
-    d_min, d_max = min(data), max(data)
-    factor = (f_max - f_min) / (d_max - d_min)
-    normalized = f_min + (data - d_min) * factor
-    return normalized, factor
-
-
-def normalize_data_frame(df, start_index=0):
-    factors = {}
-    for index in range(start_index, df.shape[1]):
-        df.iloc[:, index], factor = normalize_feature(data=df.iloc[:, index])
-        factors[index] = factor
-    return df, factors
-
-
 def get_euclidean_metric(vec1, vec2):
     return np.sqrt(np.sum(np.square(vec1 - vec2)))
 
